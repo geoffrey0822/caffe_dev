@@ -30,26 +30,52 @@ void MorphLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom, const ve
 	CHECK(top.size()==2)<<"Only support 2 outputs";
 	vector<int> input1_shape=bottom[0]->shape();
 	vector<int> input2_shape=bottom[1]->shape();
+	printf("[2]=%d<>%d,[3]=%d<>%d\n",input1_shape[2],input2_shape[2],input1_shape[3],input2_shape[3]);
 	CHECK((input1_shape[2]==input2_shape[2]&&
 					input1_shape[3]==input2_shape[3]))<<"Dimension of axis 2 and 3 must be the same";
 	num_=input1_shape[0];
 	ch_size_=input1_shape[1];
 	w_=input1_shape[3];
 	h_=input1_shape[2];
-	map_.Reshape(num_,ch_size_,h_,w_);
-	unsigned int* data=map_.mutable_cpu_data();
-	int scaler=input2_shape[1];
-	size_t index;
-	for(int n=0;n<num_;n++){
-		for(int i=0;i<ch_size_;i++){
-			for(int j=0;j<h_;j++){
-				for(int k=0;k<w_;k++){
-					index=n*ch_size_*h_*w_+i*h_*w_+j*w_+k;
-					data[index]=(int)floor(((float)(i*h_*w_+j*w_+k)*scaler)/ch_size_);
+	if(w_>0 && h_>0){
+		printf("Setup for Morph Layer Reshape(%d,%d,%d,%d)\n",num_,ch_size_,w_,h_);
+		map_.Reshape(num_,ch_size_,h_,w_);
+		unsigned int* data=map_.mutable_cpu_data();
+		int scaler=input2_shape[1];
+		size_t index;
+		for(int n=0;n<num_;n++){
+			for(int i=0;i<ch_size_;i++){
+				for(int j=0;j<h_;j++){
+					for(int k=0;k<w_;k++){
+						index=n*ch_size_*h_*w_+i*h_*w_+j*w_+k;
+						data[index]=(int)floor(((float)(i*h_*w_+j*w_+k)*scaler)/ch_size_);
+					}
+				}
+			}
+		}
+	}else{
+		vector<int>new_shape(2);
+		new_shape.push_back(num_);
+		new_shape.push_back(ch_size_);
+		h_=1;
+		w_=1;
+		map_.Reshape(num_,ch_size_,h_,w_);
+		printf("Setup for Morph Layer Reshape(%d,%d,%d,%d)\n",num_,ch_size_,w_,h_);
+		unsigned int* data=map_.mutable_cpu_data();
+		int scaler=input2_shape[1];
+		size_t index;
+		for(int n=0;n<num_;n++){
+			for(int i=0;i<ch_size_;i++){
+				for(int j=0;j<h_;j++){
+					for(int k=0;k<w_;k++){
+						index=n*ch_size_*h_*w_+i*h_*w_+j*w_+k;
+						data[index]=(int)floor(((float)(i*h_*w_+j*w_+k)*scaler)/ch_size_);
+					}
 				}
 			}
 		}
 	}
+	printf("Setup Finished\n");
 }
 
 template <typename Dtype>
