@@ -33,10 +33,10 @@ void caffe_gpu_linear_proj(const int Nm,
 
     		virtual inline int MinBottomBlobs()const{return 2;}
     		virtual inline int MaxBottomBlobs()const{return 2;}
-    		virtual inline int MinTopBlobs()const{return 2;}
-    		virtual inline int MaxTopBlobs()const{return 2;}
+    		virtual inline int MinTopBlobs()const{return 1;}
+    		virtual inline int MaxTopBlobs()const{return 1;}
     		virtual inline int ExactNumBottomBlobs() const { return 2; }
-    		virtual inline int ExactNumTopBlobs() const { return 2; }
+    		virtual inline int ExactNumTopBlobs() const { return 1; }
 
     		virtual void LayerSetUp(const vector<Blob<Dtype>*>&bottom,
     				const vector<Blob<Dtype>*>&top);

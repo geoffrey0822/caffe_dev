@@ -29,8 +29,7 @@ protected:
 		 bblob_3_(new Blob<Dtype>(32,2,10,10)),
 		 bblob_4_(new Blob<Dtype>(32,14,1,1)),
 		 bblob_5_(new Blob<Dtype>(32,2,1,1)),
-		 blob_top_0_(new Blob<Dtype>),
-		 blob_top_1_(new Blob<Dtype>){}
+		 blob_top_0_(new Blob<Dtype>){}
 
 	virtual void SetUp(){
 
@@ -57,7 +56,6 @@ protected:
 		bblobs_0d_.push_back(bblob_4_);
 		bblobs_0d_.push_back(bblob_5_);
 		tblobs_.push_back(blob_top_0_);
-		tblobs_.push_back(blob_top_1_);
 	}
 
 	virtual ~MorphLayer_Test(){
@@ -68,7 +66,6 @@ protected:
 		delete bblob_4_;
 		delete bblob_5_;
 		delete blob_top_0_;
-		delete blob_top_1_;
 	}
 
 	Blob<Dtype>* const bblob_0_;
@@ -78,7 +75,6 @@ protected:
 	Blob<Dtype>* bblob_4_;
 	Blob<Dtype>* bblob_5_;
 	Blob<Dtype>* const blob_top_0_;
-	Blob<Dtype>* const blob_top_1_;
 	vector<Blob<Dtype>*> bblobs_;
 	vector<Blob<Dtype>*> bblobs_md_;
 	vector<Blob<Dtype>*> bblobs_0d_;
@@ -98,10 +94,6 @@ TYPED_TEST(MorphLayer_Test, TestSetupNum){
 	EXPECT_EQ(this->bblobs_[0]->shape()[2],this->tblobs_[0]->shape()[2]);
 	EXPECT_EQ(this->bblobs_[0]->shape()[3],this->tblobs_[0]->shape()[3]);
 
-	EXPECT_EQ(this->bblobs_[0]->shape()[0],this->tblobs_[1]->shape()[0]);
-	EXPECT_EQ(this->bblobs_[0]->shape()[1],this->tblobs_[1]->shape()[1]);
-	EXPECT_EQ(this->bblobs_[0]->shape()[2],this->tblobs_[1]->shape()[2]);
-	EXPECT_EQ(this->bblobs_[0]->shape()[3],this->tblobs_[1]->shape()[3]);
 
 }
 TYPED_TEST(MorphLayer_Test, TestForward){
@@ -112,10 +104,7 @@ TYPED_TEST(MorphLayer_Test, TestForward){
 	layer.Forward(this->bblobs_,this->tblobs_);
 
 	for(int i=0;i<this->tblobs_[0]->count();i++){
-		EXPECT_EQ(this->bblobs_[0]->cpu_data()[i],this->tblobs_[0]->cpu_data()[i]);
-	}
-	for(int i=0;i<this->tblobs_[1]->count();i++){
-		EXPECT_EQ(this->bblobs_[1]->cpu_data()[layer.map_.cpu_data()[i]],this->tblobs_[1]->cpu_data()[i]);
+		EXPECT_EQ(this->bblobs_[1]->cpu_data()[layer.map_.cpu_data()[i]],this->tblobs_[0]->cpu_data()[i]);
 	}
 }
 
@@ -127,10 +116,7 @@ TYPED_TEST(MorphLayer_Test, TestForward_MD){
 	layer.Forward(this->bblobs_md_,this->tblobs_);
 
 	for(int i=0;i<this->tblobs_[0]->count();i++){
-		EXPECT_EQ(this->bblobs_md_[0]->cpu_data()[i],this->tblobs_[0]->cpu_data()[i]);
-	}
-	for(int i=0;i<this->tblobs_[1]->count();i++){
-		EXPECT_EQ(this->bblobs_md_[1]->cpu_data()[layer.map_.cpu_data()[i]],this->tblobs_[1]->cpu_data()[i]);
+		EXPECT_EQ(this->bblobs_md_[1]->cpu_data()[layer.map_.cpu_data()[i]],this->tblobs_[0]->cpu_data()[i]);
 	}
 }
 

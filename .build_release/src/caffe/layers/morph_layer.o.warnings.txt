@@ -1,0 +1,26 @@
+src/caffe/layers/morph_layer.cpp: In instantiation of ‘void caffe::MorphLayer<Dtype>::Forward_cpu(const std::vector<caffe::Blob<Dtype>*>&, const std::vector<caffe::Blob<Dtype>*>&) [with Dtype = float]’:
+src/caffe/layers/morph_layer.cpp:133:1:   required from here
+src/caffe/layers/morph_layer.cpp:104:15: warning: unused variable ‘bottom1_data’ [-Wunused-variable]
+  const Dtype* bottom1_data=bottom[0]->cpu_data();
+               ^
+src/caffe/layers/morph_layer.cpp: In instantiation of ‘void caffe::MorphLayer<Dtype>::Backward_cpu(const std::vector<caffe::Blob<Dtype>*>&, const std::vector<bool>&, const std::vector<caffe::Blob<Dtype>*>&) [with Dtype = float]’:
+src/caffe/layers/morph_layer.cpp:133:1:   required from here
+src/caffe/layers/morph_layer.cpp:119:10: warning: unused variable ‘bottom1_diff’ [-Wunused-variable]
+   Dtype* bottom1_diff=bottom[0]->mutable_cpu_diff();
+          ^
+src/caffe/layers/morph_layer.cpp:121:16: warning: unused variable ‘top1_diff’ [-Wunused-variable]
+   const Dtype* top1_diff=top[0]->cpu_diff();
+                ^
+src/caffe/layers/morph_layer.cpp: In instantiation of ‘void caffe::MorphLayer<Dtype>::Forward_cpu(const std::vector<caffe::Blob<Dtype>*>&, const std::vector<caffe::Blob<Dtype>*>&) [with Dtype = double]’:
+src/caffe/layers/morph_layer.cpp:133:1:   required from here
+src/caffe/layers/morph_layer.cpp:104:15: warning: unused variable ‘bottom1_data’ [-Wunused-variable]
+  const Dtype* bottom1_data=bottom[0]->cpu_data();
+               ^
+src/caffe/layers/morph_layer.cpp: In instantiation of ‘void caffe::MorphLayer<Dtype>::Backward_cpu(const std::vector<caffe::Blob<Dtype>*>&, const std::vector<bool>&, const std::vector<caffe::Blob<Dtype>*>&) [with Dtype = double]’:
+src/caffe/layers/morph_layer.cpp:133:1:   required from here
+src/caffe/layers/morph_layer.cpp:119:10: warning: unused variable ‘bottom1_diff’ [-Wunused-variable]
+   Dtype* bottom1_diff=bottom[0]->mutable_cpu_diff();
+          ^
+src/caffe/layers/morph_layer.cpp:121:16: warning: unused variable ‘top1_diff’ [-Wunused-variable]
+   const Dtype* top1_diff=top[0]->cpu_diff();
+                ^
