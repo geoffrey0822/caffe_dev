@@ -4,8 +4,29 @@ import numpy as np
 import cv2
 import json
 import csv
+from pip.req.req_file import preprocess
 
 class MultilabelDataLyer(caffe.Layer):
+    def preprocess(self,input):
+        output=[]
+        if self.mode==1:
+            output=np.zeros((3,input.shape[0],input.shape[1]),dtype=np.float32)
+            gs=cv2.cvtColor(input,cv2.COLOR_BGR2GRAY)
+            sX=cv2.Sobel(gs,cv2.CV_32F,1,0,ksize=3)
+            sY=cv2.Sobel(gs,cv2.CV_32F,0,1,ksize=3)
+            output[0,:,:]=sX
+            output[1,:,:]=sY
+            output[2,:,:]=gs.astype(float)
+        elif self.mode==2:
+            output=np.zeros((1,input.shape[0],input.shape[1]),dtype=np.float32)
+            gs=cv2.cvtColor(input,cv2.COLOR_BGR2GRAY)
+            output[0,:,:]=cv2.Laplacian(gs,cv2.CV_32F)
+        elif self.mode==3:
+            output=np.zeros((1,input.shape[0],input.shape[1]),dtype=np.float32)
+            output[0,:,:]=cv2.cvtColor(input,cv2.COLOR_BGR2GRAY)
+            
+        return output
+    
     def setup(self,bottom,top):
         params=json.loads(self.param_str)
         self.db_file=''
@@ -23,6 +44,7 @@ class MultilabelDataLyer(caffe.Layer):
         self.nlabel=1
         self.nchannel=1
         self.batch=1
+        self.mode=0
         if self.height>0 and self.width>0 and 'batch_size' in params:
             self.batch=int(params['batch_size'])
         if len(top)!=2:
@@ -41,11 +63,24 @@ class MultilabelDataLyer(caffe.Layer):
                     print row
                     self.nlabel=len(row[1].split(';'))
                     self.nchannel=cv2.imread(row[0].replace('\\\\','/').replace('\\','/')).shape[2]
+        
+        if 'mode' in params:
+            if params['mode']=='multichannel':
+                self.mode=1
+                self.nchannel=3
+            elif params['mode']=='edge':
+                self.mode=2
+                self.nchannel=1
+            elif params['mode']=='grayscale':
+                self.mode=3
+                self.nchannel=1
+        
         self.current_batch=0
         self.max_batch=int(np.floor(self.total_rec/self.batch))
-        if self.batch>1:
-            top[0].reshape(self.batch,self.nchannel,self.height,self.width)
-            top[1].reshape(self.batch,self.nlabel)
+        #if self.batch>1:
+        top[0].reshape(self.batch,self.nchannel,self.height,self.width)
+        top[1].reshape(self.batch,self.nlabel)
+        
         self.db=open(self.db_file,'r')
         self.reader=csv.reader(self.db,delimiter=',')
         self.current_row=None
@@ -56,7 +91,10 @@ class MultilabelDataLyer(caffe.Layer):
             record=self.current_row
             imgpath=record[0].replace('\\\\','/').replace('\\','/')
             img=cv2.imread(imgpath)
-            top[0].reshape(1,img.shape[2],img.shape[0],img.shape[1])
+            if self.nchannel>0:
+                top[0].reshape(1,self.nchannel,img.shape[0],img.shape[1])
+            else:
+                top[0].reshape(1,img.shape[2],img.shape[0],img.shape[1])
             self.current_rec+=1
         #if self.batch>1:
         #    if self.current_batch>self.max_batch:
@@ -89,10 +127,13 @@ class MultilabelDataLyer(caffe.Layer):
                 record=self.reader.next()
                 imgpath=record[0].replace('\\\\','/').replace('\\','/')
                 img=cv2.imread(imgpath)
-                if self.batch>1:
-                    img=cv2.resize(img,(self.width,self.height))
-                img=img[:,:,(2,1,0)]
-                img=img.swapaxes(0,2).swapaxes(1,2)
+                #if self.batch>1:
+                img=cv2.resize(img,(self.width,self.height))
+                if self.mode==0:
+                    img=img[:,:,(2,1,0)]
+                    img=img.swapaxes(0,2).swapaxes(1,2)
+                else:
+                    img=self.preprocess(img)
                 top[1].data[nbatch,...]=record[1].split(';')
                 top[0].data[nbatch,...]=img
         else:
@@ -103,10 +144,12 @@ class MultilabelDataLyer(caffe.Layer):
             record=self.current_row
             imgpath=record[0].replace('\\\\','/').replace('\\','/')
             img=cv2.imread(imgpath)
-            if self.batch>1:
-                img=cv2.resize(img,(self.width,self.height))
-            img=img[:,:,(2,1,0)]
-            img=img.swapaxes(0,2).swapaxes(1,2)
+            if self.mode==0:
+                img=img[:,:,(2,1,0)]
+                img=img.swapaxes(0,2).swapaxes(1,2)
+            else:
+                img=self.preprocess(img)
+            
             top[1].data[0,...]=record[1].split(';')
             top[0].data[0,...]=img
                    
