@@ -387,6 +387,7 @@ message LayerParameter {
   optional LRNParameter lrn_param = 118;
   optional MemoryDataParameter memory_data_param = 119;
   optional MVNParameter mvn_param = 120;
+  optional MorphParameter morph_param = 8300001;
   optional ParameterParameter parameter_param = 145;
   optional PoolingParameter pooling_param = 121;
   optional PowerParameter power_param = 122;
@@ -890,6 +891,18 @@ message MVNParameter {
 
   // Epsilon for not dividing by zero while normalizing variance
   optional float eps = 3 [default = 1e-9];
+}
+
+message MorphParameter {
+	enum ConstraintType{
+		HOMO=0;
+		ISO=1;
+	}
+	
+	optional ConstraintType type = 1 [default=HOMO];
+	optional string index_map = 2;
+	optional bool differentiable = 3 [default=false];
+	optional float threshold = 4 [default=1e-1];
 }
 
 message ParameterParameter {
