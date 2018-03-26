@@ -3063,10 +3063,10 @@ class LayerParameter : public ::google::protobuf::Message {
   inline ::caffe::MVNParameter* release_mvn_param();
   inline void set_allocated_mvn_param(::caffe::MVNParameter* mvn_param);
 
-  // optional .caffe.MorphParameter morph_param = 8300001;
+  // optional .caffe.MorphParameter morph_param = 147;
   inline bool has_morph_param() const;
   inline void clear_morph_param();
-  static const int kMorphParamFieldNumber = 8300001;
+  static const int kMorphParamFieldNumber = 147;
   inline const ::caffe::MorphParameter& morph_param() const;
   inline ::caffe::MorphParameter* mutable_morph_param();
   inline ::caffe::MorphParameter* release_morph_param();
@@ -3153,10 +3153,10 @@ class LayerParameter : public ::google::protobuf::Message {
   inline ::caffe::ReshapeParameter* release_reshape_param();
   inline void set_allocated_reshape_param(::caffe::ReshapeParameter* reshape_param);
 
-  // optional .caffe.ROIPoolingParameter roi_pooling_param = 8266711;
+  // optional .caffe.ROIPoolingParameter roi_pooling_param = 149;
   inline bool has_roi_pooling_param() const;
   inline void clear_roi_pooling_param();
-  static const int kRoiPoolingParamFieldNumber = 8266711;
+  static const int kRoiPoolingParamFieldNumber = 149;
   inline const ::caffe::ROIPoolingParameter& roi_pooling_param() const;
   inline ::caffe::ROIPoolingParameter* mutable_roi_pooling_param();
   inline ::caffe::ROIPoolingParameter* release_roi_pooling_param();
@@ -3180,10 +3180,10 @@ class LayerParameter : public ::google::protobuf::Message {
   inline ::caffe::SigmoidParameter* release_sigmoid_param();
   inline void set_allocated_sigmoid_param(::caffe::SigmoidParameter* sigmoid_param);
 
-  // optional .caffe.SmoothL1LossParameter smooth_l1_loss_param = 8266712;
+  // optional .caffe.SmoothL1LossParameter smooth_l1_loss_param = 148;
   inline bool has_smooth_l1_loss_param() const;
   inline void clear_smooth_l1_loss_param();
-  static const int kSmoothL1LossParamFieldNumber = 8266712;
+  static const int kSmoothL1LossParamFieldNumber = 148;
   inline const ::caffe::SmoothL1LossParameter& smooth_l1_loss_param() const;
   inline ::caffe::SmoothL1LossParameter* mutable_smooth_l1_loss_param();
   inline ::caffe::SmoothL1LossParameter* release_smooth_l1_loss_param();
@@ -6977,12 +6977,12 @@ class MorphParameter : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .caffe.MorphParameter.ConstraintType type = 1 [default = HOMO];
-  inline bool has_type() const;
-  inline void clear_type();
-  static const int kTypeFieldNumber = 1;
-  inline ::caffe::MorphParameter_ConstraintType type() const;
-  inline void set_type(::caffe::MorphParameter_ConstraintType value);
+  // optional .caffe.MorphParameter.ConstraintType ctype = 1 [default = HOMO];
+  inline bool has_ctype() const;
+  inline void clear_ctype();
+  static const int kCtypeFieldNumber = 1;
+  inline ::caffe::MorphParameter_ConstraintType ctype() const;
+  inline void set_ctype(::caffe::MorphParameter_ConstraintType value);
 
   // optional string index_map = 2;
   inline bool has_index_map() const;
@@ -7012,8 +7012,8 @@ class MorphParameter : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:caffe.MorphParameter)
  private:
-  inline void set_has_type();
-  inline void clear_has_type();
+  inline void set_has_ctype();
+  inline void clear_has_ctype();
   inline void set_has_index_map();
   inline void clear_has_index_map();
   inline void set_has_differentiable();
@@ -7026,7 +7026,7 @@ class MorphParameter : public ::google::protobuf::Message {
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
   ::std::string* index_map_;
-  int type_;
+  int ctype_;
   bool differentiable_;
   float threshold_;
   friend void  protobuf_AddDesc_caffe_2eproto();
@@ -15425,7 +15425,7 @@ inline void LayerParameter::set_allocated_mvn_param(::caffe::MVNParameter* mvn_p
   // @@protoc_insertion_point(field_set_allocated:caffe.LayerParameter.mvn_param)
 }
 
-// optional .caffe.MorphParameter morph_param = 8300001;
+// optional .caffe.MorphParameter morph_param = 147;
 inline bool LayerParameter::has_morph_param() const {
   return (_has_bits_[1] & 0x00000100u) != 0;
 }
@@ -15835,7 +15835,7 @@ inline void LayerParameter::set_allocated_reshape_param(::caffe::ReshapeParamete
   // @@protoc_insertion_point(field_set_allocated:caffe.LayerParameter.reshape_param)
 }
 
-// optional .caffe.ROIPoolingParameter roi_pooling_param = 8266711;
+// optional .caffe.ROIPoolingParameter roi_pooling_param = 149;
 inline bool LayerParameter::has_roi_pooling_param() const {
   return (_has_bits_[1] & 0x00040000u) != 0;
 }
@@ -15958,7 +15958,7 @@ inline void LayerParameter::set_allocated_sigmoid_param(::caffe::SigmoidParamete
   // @@protoc_insertion_point(field_set_allocated:caffe.LayerParameter.sigmoid_param)
 }
 
-// optional .caffe.SmoothL1LossParameter smooth_l1_loss_param = 8266712;
+// optional .caffe.SmoothL1LossParameter smooth_l1_loss_param = 148;
 inline bool LayerParameter::has_smooth_l1_loss_param() const {
   return (_has_bits_[1] & 0x00200000u) != 0;
 }
@@ -19940,29 +19940,29 @@ inline void MVNParameter::set_eps(float value) {
 
 // MorphParameter
 
-// optional .caffe.MorphParameter.ConstraintType type = 1 [default = HOMO];
-inline bool MorphParameter::has_type() const {
+// optional .caffe.MorphParameter.ConstraintType ctype = 1 [default = HOMO];
+inline bool MorphParameter::has_ctype() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void MorphParameter::set_has_type() {
+inline void MorphParameter::set_has_ctype() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void MorphParameter::clear_has_type() {
+inline void MorphParameter::clear_has_ctype() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void MorphParameter::clear_type() {
-  type_ = 0;
-  clear_has_type();
+inline void MorphParameter::clear_ctype() {
+  ctype_ = 0;
+  clear_has_ctype();
 }
-inline ::caffe::MorphParameter_ConstraintType MorphParameter::type() const {
-  // @@protoc_insertion_point(field_get:caffe.MorphParameter.type)
-  return static_cast< ::caffe::MorphParameter_ConstraintType >(type_);
+inline ::caffe::MorphParameter_ConstraintType MorphParameter::ctype() const {
+  // @@protoc_insertion_point(field_get:caffe.MorphParameter.ctype)
+  return static_cast< ::caffe::MorphParameter_ConstraintType >(ctype_);
 }
-inline void MorphParameter::set_type(::caffe::MorphParameter_ConstraintType value) {
+inline void MorphParameter::set_ctype(::caffe::MorphParameter_ConstraintType value) {
   assert(::caffe::MorphParameter_ConstraintType_IsValid(value));
-  set_has_type();
-  type_ = value;
-  // @@protoc_insertion_point(field_set:caffe.MorphParameter.type)
+  set_has_ctype();
+  ctype_ = value;
+  // @@protoc_insertion_point(field_set:caffe.MorphParameter.ctype)
 }
 
 // optional string index_map = 2;

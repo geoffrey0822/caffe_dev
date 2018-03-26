@@ -360,6 +360,7 @@ message LayerParameter {
   // for their implementation. These layers include an Engine type and
   // engine parameter for selecting the implementation.
   // The default for the engine is set by the ENGINE switch at compile-time.
+  // last ID=149
   optional AccuracyParameter accuracy_param = 102;
   optional ArgMaxParameter argmax_param = 103;
   optional BatchNormParameter batch_norm_param = 139;
@@ -387,7 +388,7 @@ message LayerParameter {
   optional LRNParameter lrn_param = 118;
   optional MemoryDataParameter memory_data_param = 119;
   optional MVNParameter mvn_param = 120;
-  optional MorphParameter morph_param = 8300001;
+  optional MorphParameter morph_param = 147;
   optional ParameterParameter parameter_param = 145;
   optional PoolingParameter pooling_param = 121;
   optional PowerParameter power_param = 122;
@@ -397,10 +398,10 @@ message LayerParameter {
   optional ReductionParameter reduction_param = 136;
   optional ReLUParameter relu_param = 123;
   optional ReshapeParameter reshape_param = 133;
-  optional ROIPoolingParameter roi_pooling_param = 8266711;
+  optional ROIPoolingParameter roi_pooling_param = 149;
   optional ScaleParameter scale_param = 142;
   optional SigmoidParameter sigmoid_param = 124;
-  optional SmoothL1LossParameter smooth_l1_loss_param = 8266712;
+  optional SmoothL1LossParameter smooth_l1_loss_param = 148;
   optional SoftmaxParameter softmax_param = 125;
   optional SPPParameter spp_param = 132;
   optional SliceParameter slice_param = 126;
@@ -899,7 +900,7 @@ message MorphParameter {
 		ISO=1;
 	}
 	
-	optional ConstraintType type = 1 [default=HOMO];
+	optional ConstraintType ctype = 1 [default=HOMO];
 	optional string index_map = 2;
 	optional bool differentiable = 3 [default=false];
 	optional float threshold = 4 [default=1e-1];
