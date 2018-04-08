@@ -57,4 +57,4 @@ This repository is created by Geoffrey Poon for inventing new layers. The core C
 Please cite our layers if it helps your research:
 
 
-Contact Me: [mailto](geoffrey_poon@ieee.org)
+Contact Me: [geoffrey_poon@ieee.org]
