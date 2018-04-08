@@ -43,3 +43,18 @@ Please cite Caffe in your publications if it helps your research:
       Title = {Caffe: Convolutional Architecture for Fast Feature Embedding},
       Year = {2014}
     }
+
+## Added Layers
+
+1. Morph Layer
+2. Correlation Layer
+3. ExpDecayLoss Layer
+
+## Addition License and Citation
+
+This repository is created by Geoffrey Poon for inventing new layers. The core Caffe framework may be imcompitable with the latest version of Caffe, please use it carefully.
+
+Please cite our layers if it helps your research:
+
+
+Contact Me: [mailto](geoffrey_poon@ieee.org)
