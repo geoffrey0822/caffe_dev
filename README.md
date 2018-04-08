@@ -50,7 +50,7 @@ Please cite Caffe in your publications if it helps your research:
 2. Correlation Layer
 3. ExpDecayLoss Layer
 
-## Addition License and Citation
+## Additional License and Citation
 
 This repository is created by Geoffrey Poon for inventing new layers. The core Caffe framework may be imcompitable with the latest version of Caffe, please use it carefully.
 
