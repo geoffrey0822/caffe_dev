@@ -18,7 +18,8 @@ __global__ void gpu_exp_loss_kernel(const int N, const int ch, const Dtype*x, co
 	CUDA_KERNEL_LOOP(i, N){
 		float loss = 0;
 		for (int j = 0; j < ch; j++){
-			loss += (fabs(x[i*ch + j]) + (exp(-1.0)*(exp(fabs(x[i*ch + j])) - 1.0)))*scaler;
+			//loss += (fabs(x[i*ch + j]) + (exp(-1.0)*(exp(fabs(x[i*ch + j])) - 1.0)))*scaler;
+			loss+=(1.0-exp(-fabs(x[i*ch + j])))*scaler;
 		}
 		y[0] += loss/(Dtype)N;
 	}
@@ -33,8 +34,11 @@ __global__ void gpu_diff_exp_loss_kernel(const int N, const int ch, const Dtype*
 				sign = 1.0;
 				if (x[i*ch + j] < 0)
 					sign = -1;
+				else if(x[i*ch + j]==0)
+					sign=0;
 				//dx[i*ch + j] = (x[i*ch + j] / fabs(x[i*ch + j]))*(1.f + (exp(-1.f)*(exp(fabs(x[i*ch + j])) - 1.f)))*scaler;
-				dx[i*ch + j] = sign*(1.0 + (exp(-1.0)*(exp(fabs(x[i*ch + j])) - 1.0)))*scaler;
+				//dx[i*ch + j] = sign*(1.0 + (exp(-1.0)*(exp(fabs(x[i*ch + j])) - 1.0)))*scaler;
+				dx[i*ch + j]=sign*exp(-fabs(x[i*ch + j]))*scaler;
 			}
 		}
 	}

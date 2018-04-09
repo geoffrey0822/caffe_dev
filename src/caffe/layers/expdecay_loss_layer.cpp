@@ -19,7 +19,8 @@ void caffe_exp_loss(const int N,const int ch, const Dtype* x,const Dtype scaler,
 	for (int i = 0; i < N; i++){
 		loss = 0;
 		for (int j = 0; j < ch; j++){
-			loss += (fabs(x[i*ch + j]) + (exp(-1)*(exp(fabs(x[i*ch + j])) - 1.f)))*scaler;
+			//loss += (fabs(x[i*ch + j]) + (exp(-1)*(exp(fabs(x[i*ch + j])) - 1.f)))*scaler;
+			loss+=(1.0-exp(-fabs(x[i*ch + j])))*scaler;
 		}
 		sumY[0] += loss;
 	}
@@ -42,8 +43,11 @@ void caffe_diff_exp_loss(const int N, const int ch, const Dtype*x, const Dtype s
 			sign = 1;
 			if (x[i*ch + j] < 0)
 				sign = -1;
+			else if(x[i*ch + j]==0)
+				sign=0;
 				//dx[i*ch + j] = (x[i*ch + j] / fabs(x[i*ch + j]))*(1.f + (exp(-1)*(exp(fabs(x[i*ch + j])) - 1.f)))*scaler;
-			dx[i*ch + j] = sign*(1.f + (exp(-1)*(exp(fabs(x[i*ch + j])) - 1.f)))*scaler;
+			//dx[i*ch + j] = sign*(1.f + (exp(-1)*(exp(fabs(x[i*ch + j])) - 1.f)))*scaler;
+			dx[i*ch + j]=sign*exp(-fabs(x[i*ch + j]))*scaler;
 		}
 	}
 }
