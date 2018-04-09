@@ -19,7 +19,8 @@ __global__ void gpu_exp_loss_kernel(const int N, const int ch, const Dtype*x, co
 		float loss = 0;
 		for (int j = 0; j < ch; j++){
 			//loss += (fabs(x[i*ch + j]) + (exp(-1.0)*(exp(fabs(x[i*ch + j])) - 1.0)))*scaler;
-			loss+=(1.0-exp(-fabs(x[i*ch + j])))*scaler;
+			//loss+=(1.0-exp(-fabs(x[i*ch + j])))*scaler;
+			loss+=((1.0+exp(-1.0))-(x[i*ch + j]+exp(-fabs(x[i*ch + j]))))*scaler;
 		}
 		y[0] += loss/(Dtype)N;
 	}
@@ -38,7 +39,8 @@ __global__ void gpu_diff_exp_loss_kernel(const int N, const int ch, const Dtype*
 					sign=0;
 				//dx[i*ch + j] = (x[i*ch + j] / fabs(x[i*ch + j]))*(1.f + (exp(-1.f)*(exp(fabs(x[i*ch + j])) - 1.f)))*scaler;
 				//dx[i*ch + j] = sign*(1.0 + (exp(-1.0)*(exp(fabs(x[i*ch + j])) - 1.0)))*scaler;
-				dx[i*ch + j]=sign*exp(-fabs(x[i*ch + j]))*scaler;
+				//dx[i*ch + j]=sign*exp(-fabs(x[i*ch + j]))*scaler;
+				dx[i*ch + j]=(1.0-sign*exp(-fabs(x[i*ch + j])))*scaler;
 			}
 		}
 	}
