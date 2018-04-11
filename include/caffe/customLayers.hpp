@@ -26,12 +26,23 @@ void caffe_pearson_correlation(const int N, const int k,
 		const Dtype* x,const Dtype* y,Dtype* z);
 
 template <typename Dtype>
+void caffe_pearson_correlation_check(const int N, const int k,
+		const Dtype* x,const Dtype* y,const Dtype* rx,const Dtype* ry,Dtype* z);
+
+
+template <typename Dtype>
 void caffe_diff_pearson_correlation(const int N, const int k,
 		const Dtype* x, const Dtype* y, Dtype* dx,Dtype *dy);
+
 
 template <typename Dtype>
 void caffe_gpu_pearson_correlation(const int N, const int k,
 		const Dtype* x,const Dtype* y,Dtype* z,
+		Dtype* x_mean,Dtype* y_mean,Dtype* g2_a,Dtype* g2_b,Dtype* g1);
+
+template <typename Dtype>
+void caffe_gpu_pearson_correlation_check(const int N, const int k,
+		const Dtype* x,const Dtype* y,const Dtype* rx,const Dtype* ry,Dtype* z,
 		Dtype* x_mean,Dtype* y_mean,Dtype* g2_a,Dtype* g2_b,Dtype* g1);
 
 template <typename Dtype>
@@ -105,7 +116,8 @@ void caffe_diff_exp_loss(const int N, const int ch, const Dtype*x, const Dtype s
     	explicit CorrelationLayer(const LayerParameter& param):
     	Layer<Dtype>(param){}
     	virtual inline const char* type() const {return "Correlation";}
-    	virtual inline int ExactNumBottomBlobs() const { return 2; }
+    	virtual inline int MinBottomBlobs()const{return 2;}
+    	virtual inline int MaxBottomBlobs()const{return 4;}
     	virtual inline int ExactNumTopBlobs() const { return 1; }
     	virtual void LayerSetUp(const vector<Blob<Dtype>*>&bottom,
     	    				const vector<Blob<Dtype>*>&top);
@@ -129,6 +141,7 @@ void caffe_diff_exp_loss(const int N, const int ch, const Dtype*x, const Dtype s
         							const vector<Blob<Dtype>*>&bottom);
         Dtype _threshold;
         bool _norm;
+        bool _compareSame;
         Blob<Dtype> x_mean_;
         Blob<Dtype> y_mean_;
         Blob<Dtype> X_;

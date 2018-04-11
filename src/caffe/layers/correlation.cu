@@ -45,6 +45,21 @@ __global__ void norm_correl(const int N,const Dtype *mag, const Dtype *g2_x, con
 		z[i] = mag[i] / sqrt((g2_x[i] * g2_y[i]));
 	}
 }
+template <typename Dtype>
+__global__ void norm_correl_check(const int N,const Dtype *mag, const Dtype *g2_x, const Dtype* g2_y,
+		const Dtype* rx,const Dtype* ry,Dtype* z){
+	CUDA_KERNEL_LOOP(i, N){
+		if(rx[i]!=ry[i])
+			z[i]=0;
+		else{
+			Dtype divider=g2_x[i] * g2_y[i];
+			if(divider>1e-6)
+				z[i] = mag[i] / sqrt(divider);
+			else
+				z[i]=0;
+		}
+	}
+}
 
 template <typename Dtype>
 __global__ void cproduct_kernel(const int N, const Dtype* x, const Dtype* y, Dtype* z){
@@ -95,6 +110,7 @@ __global__ void vec_sum(const int N,const int dim, const Dtype*x, Dtype*y) {
 		y[i] = sum;
 	}
 }
+
 
 template <typename Dtype>
 __global__ void weighted_kernel(const int N, const int dim, const Dtype* x,const Dtype *w, Dtype *y){
@@ -153,6 +169,28 @@ template void caffe_gpu_pearson_correlation<float>(const int N, const int k,
 		const float* x,const float* y,float* z,
 		float* x_mean,float* y_mean,float* g2_a,float* g2_b,float* g1);
 
+template <typename Dtype>
+void caffe_gpu_pearson_correlation_check(const int n, const int k,
+		const Dtype* x,const Dtype* y,const Dtype* rx,const Dtype* ry,Dtype* z,
+		Dtype* x_mean,Dtype* y_mean,Dtype* g2_a,Dtype* g2_b,Dtype* g1){
+	vec_sum << <CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS >> >(n, k, x, x_mean);
+	cdiv_kernel << <CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS >> >(n, x_mean, (Dtype)k, x_mean);
+	vec_sum << <CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS >> >(n, k, y, y_mean);
+	cdiv_kernel << <CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS >> >(n, y_mean, (Dtype)k, y_mean);
+
+	cov << <CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS >> >(n, k, x, x_mean, y, y_mean, g1);
+	cov << <CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS >> >(n, k, x, x_mean, x, x_mean, g2_a);
+	cov << <CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS >> >(n, k, y, y_mean, y, y_mean, g2_b);
+
+	norm_correl_check << <CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS >> >(n, g1, g2_a, g2_b,rx,ry, z);
+}
+
+template void caffe_gpu_pearson_correlation_check<double>(const int N, const int k,
+		const double* x,const double* y,const double* rx,const double* ry,double* z,
+		double* x_mean,double* y_mean,double* g2_a,double* g2_b,double* g1);
+template void caffe_gpu_pearson_correlation_check<float>(const int N, const int k,
+		const float* x,const float* y,const float* rx,const float* ry,float* z,
+		float* x_mean,float* y_mean,float* g2_a,float* g2_b,float* g1);
 
 template <typename Dtype>
 void caffe_gpu_diff_pearson_correlation(const int n, const int k,
@@ -209,11 +247,20 @@ void CorrelationLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>&bottom,
 	const Dtype* x_data=bottom[0]->gpu_data();
 	const Dtype* y_data=bottom[1]->gpu_data();
 	Dtype* z=top[0]->mutable_gpu_data();
-	caffe_gpu_pearson_correlation(dim0,dim1,x_data,y_data,z,
-			x_mean_.mutable_gpu_data(),y_mean_.mutable_gpu_data(),
-			X_.mutable_gpu_data(),Y_.mutable_gpu_data(),
-			g1_.mutable_gpu_data());
 
+	if(_compareSame){
+		const Dtype* rx=bottom[2]->gpu_data();
+		const Dtype* ry=bottom[3]->gpu_data();
+		caffe_gpu_pearson_correlation_check(dim0,dim1,x_data,y_data,rx,ry,z,
+				x_mean_.mutable_gpu_data(),y_mean_.mutable_gpu_data(),
+				X_.mutable_gpu_data(),Y_.mutable_gpu_data(),
+				g1_.mutable_gpu_data());
+	}else{
+		caffe_gpu_pearson_correlation(dim0,dim1,x_data,y_data,z,
+				x_mean_.mutable_gpu_data(),y_mean_.mutable_gpu_data(),
+				X_.mutable_gpu_data(),Y_.mutable_gpu_data(),
+				g1_.mutable_gpu_data());
+	}
 }
 
 

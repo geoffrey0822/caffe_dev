@@ -47,6 +47,42 @@ template void caffe_pearson_correlation<float>(const int N, const int k,
 		const float* x,const float* y,float* z);
 
 template <typename Dtype>
+void caffe_pearson_correlation_check(const int N, const int k,
+		const Dtype* x,const Dtype* y,const Dtype* rx,const Dtype* ry,Dtype* z){
+	Dtype g1,g2,X,Y,meanX,meanY;
+	for (int i = 0; i < N; i++){
+		if(rx[i]!=ry[i])
+			z[i]=1;
+		else{
+			meanX = 0;
+			meanY = 0;
+			g1 = 0;
+			g2 = 0;
+			X = 0;
+			Y = 0;
+			for (int j = 0; j < k; j++){
+				meanX += x[i*k + j] /k;
+				meanY += y[i*k + j] / k;
+			}
+			for (int j = 0; j < k; j++){
+				g1 += (x[i*k + j] - meanX)*(y[i*k + j] - meanY);
+				X += (x[i*k + j] - meanX)*(x[i*k + j] - meanX);
+				Y += (y[i*k + j] - meanY)*(y[i*k + j] - meanY);
+			}
+			printf("Mean:%f,%f\n", meanX, meanY);
+			printf("G2X=%f,G2Y=%f\n", X, Y);
+			g2 = sqrt(X*Y);
+			z[i] = g1 / g2;
+		}
+	}
+}
+
+template void caffe_pearson_correlation_check<double>(const int N, const int k,
+		const double* x,const double* y,const double* rx,const double* ry,double* z);
+template void caffe_pearson_correlation_check<float>(const int N, const int k,
+		const float* x,const float* y,const float* rx,const float* ry,float* z);
+
+template <typename Dtype>
 void caffe_diff_pearson_correlation(const int N, const int k,
 		const Dtype* x, const Dtype* y, Dtype* dx,Dtype *dy){
 	Dtype g1, g2, X, Y, meanX, meanY, xTerm, yTerm;
@@ -84,11 +120,22 @@ template void caffe_diff_pearson_correlation<double>(const int N, const int k,
 template void caffe_diff_pearson_correlation<float>(const int N, const int k,
 		const float* x, const float* y, float* dx,float *dy);
 
+
 template<typename Dtype>
 void CorrelationLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>&bottom,
     	    				const vector<Blob<Dtype>*>&top){
 	vector<int> in_shape=bottom[0]->shape();
-	vector<int> in2_shape=bottom[0]->shape();
+	vector<int> in2_shape=bottom[1]->shape();
+
+	_compareSame=false;
+	CHECK(bottom.size()==2||bottom.size()==4)<<"The number of input must be either 2 or 4";
+	if(bottom.size()>4){
+		vector<int> in3_shape=bottom[2]->shape();
+		vector<int> in4_shape=bottom[3]->shape();
+		CHECK(in3_shape[1]==1&&in3_shape[1]==1)<<"3rd and 4th input should be the index of label dim=(Nx1)";
+
+		_compareSame=true;
+	}
 	CHECK(in_shape.size()==in2_shape.size())<<"The shape of inputs must be the same";
 	bool meetN1=false;
 	bool meetN2=false;
@@ -141,8 +188,16 @@ void CorrelationLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>&bottom,
 	int dim1=in_shape[1];
 	const Dtype* x=bottom[0]->cpu_data();
 	const Dtype* y=bottom[1]->cpu_data();
+
 	Dtype* z=top[0]->mutable_cpu_data();
-	caffe_pearson_correlation(dim0,dim1,x,y,z);
+
+	if(_compareSame){
+		const Dtype* rx=bottom[2]->cpu_data();
+		const Dtype* ry=bottom[3]->cpu_data();
+		caffe_pearson_correlation_check(dim0,dim1,x,y,rx,ry,z);
+	}
+	else
+		caffe_pearson_correlation(dim0,dim1,x,y,z);
 }
 
 template<typename Dtype>
