@@ -40,6 +40,19 @@ message Datum {
   optional bool encoded = 7 [default = false];
 }
 
+message MultiLabelDatum{
+	optional int32 channels = 1;
+  	optional int32 height = 2;
+  	optional int32 width = 3;
+  // the actual image data, in bytes
+  	optional bytes data = 4;
+  	repeated int32 labels = 5;
+  // Optionally, the datum could also hold float data.
+  	repeated float float_data = 6;
+  // If true data contains an encoded image that need to be decoded
+ 	optional bool encoded = 7 [default = false];
+}
+
 message FillerParameter {
   // The filler type.
   optional string type = 1 [default = 'constant'];
@@ -361,6 +374,7 @@ message LayerParameter {
   // engine parameter for selecting the implementation.
   // The default for the engine is set by the ENGINE switch at compile-time.
   // last ID=149
+  // Custom last_ID=151
   optional AccuracyParameter accuracy_param = 102;
   optional ArgMaxParameter argmax_param = 103;
   optional BatchNormParameter batch_norm_param = 139;
@@ -390,6 +404,7 @@ message LayerParameter {
   optional MemoryDataParameter memory_data_param = 119;
   optional MVNParameter mvn_param = 120;
   optional MorphParameter morph_param = 147; // Custom Parameters
+  optional MultiLabelDataParameter multi_label_data_param = 151;
   optional ParameterParameter parameter_param = 145;
   optional PoolingParameter pooling_param = 121;
   optional PowerParameter power_param = 122;
@@ -906,9 +921,13 @@ message MorphParameter {
 	}
 	
 	optional ConstraintType ctype = 1 [default=HOMO];
-	optional string index_map = 2;
+	optional string index_map = 2 [default=""];
 	optional bool differentiable = 3 [default=false];
 	optional float threshold = 4 [default=1e-1];
+}
+
+message MultiLabelDataParameter{
+	optional int32 nlabel = 1 [default=1];
 }
 
 message ParameterParameter {

@@ -9,6 +9,9 @@
 #include "cfloat"
 #include "caffe/customLayers.hpp"
 #include "caffe/util/math_functions.hpp"
+#include <sstream>
+#include <string>
+#include <fstream>
 
 namespace caffe {
 
@@ -87,6 +90,53 @@ void MorphLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom, const ve
 				}
 			}
 		}
+	}
+	std::string index_file=this->layer_param_.morph_param().index_map();
+	if(!index_file.empty()){
+		CHECK(boost::filesystem::exists(index_file))<<"Index map does not existed!";
+		std::ifstream infile(index_file.c_str());
+		std::string line;
+		std::string value_str;
+		int w=0,h=0,ch=0,i,j,k;
+		while(std::getline(infile,line)){
+			w=0;
+			std::istringstream ss(line);
+			while(std::getline(ss,value_str,',')){
+				w++;
+			}
+			h++;
+			if(line.empty()){
+				ch++;
+				h=0;
+			}
+		}
+		infile.close();
+		h_=h;
+		w_=w;
+		ch_size_=ch;
+		map_.Reshape(num_,ch,h,w);
+		unsigned int* data=map_.mutable_cpu_data();
+		i=0;
+		j=0;
+		k=0;
+		infile.open(index_file.c_str(),std::ifstream::in);
+		while(std::getline(infile,line)){
+			j=0;
+			std::istringstream ss(line);
+			while(std::getline(ss,value_str,',')){
+				j++;
+				for(int n=0;n<num_;n++){
+					data[ch*(w*(n*h+i)+j)+k]=atoi(value_str.c_str());
+				}
+			}
+			i++;
+			if(line.empty()){
+				k++;
+				i=0;
+			}
+		}
+		infile.close();
+
 	}
 	printf("Setup Finished\n");
 }

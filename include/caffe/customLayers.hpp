@@ -184,6 +184,7 @@ void caffe_diff_exp_loss(const int N, const int ch, const Dtype*x, const Dtype s
             Dtype _scaler;
 
         };
+
 } //namespace caffe
 
 #endif // CAFFE_CUSTOM_LAYERS_HPP_
