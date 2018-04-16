@@ -51,70 +51,40 @@ void MorphLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom, const ve
 	ch_size_=input1_shape[1];
 	int ch_size2=input2_shape[1];
 	int newI=0;
-	if(w_>0 && h_>0){
-		printf("Setup for Morph Layer Reshape(%d,%d,%d,%d)\n",num_,ch_size_,w_,h_);
-		map_.Reshape(num_,ch_size_,h_,w_);
-		unsigned int* data=map_.mutable_cpu_data();
-		int scaler=input2_shape[1];
-		size_t index;
-		for(int n=0;n<num_;n++){
-			for(int i=0;i<ch_size_;i++){
-				for(int j=0;j<h_;j++){
-					for(int k=0;k<w_;k++){
-						index=n*ch_size_*h_*w_+i*h_*w_+j*w_+k;
-						newI=(int)floor((float)(i*scaler)/ch_size_);
-						data[index]=n*ch_size2*h_*w_+newI*h_*w_+j*w_+k;
-					}
-				}
-			}
-		}
-	}else{
-		vector<int>new_shape(2);
-		new_shape.push_back(num_);
-		new_shape.push_back(ch_size_);
-		h_=1;
-		w_=1;
-		map_.Reshape(num_,ch_size_,h_,w_);
-		printf("Setup for Morph Layer Reshape(%d,%d,%d,%d)\n",num_,ch_size_,w_,h_);
-		unsigned int* data=map_.mutable_cpu_data();
-		int scaler=input2_shape[1];
-		size_t index;
-		for(int n=0;n<num_;n++){
-			for(int i=0;i<ch_size_;i++){
-				for(int j=0;j<h_;j++){
-					for(int k=0;k<w_;k++){
-						index=n*ch_size_*h_*w_+i*h_*w_+j*w_+k;
-						newI=(int)floor((float)(i*scaler)/ch_size_);
-						data[index]=n*ch_size2*h_*w_+newI*h_*w_+j*w_+k;
-					}
-				}
-			}
-		}
-	}
 	std::string index_file=this->layer_param_.morph_param().index_map();
 	if(!index_file.empty()){
+		CHECK(w_<=1&&h_<=1)<<"Morph layer only support NxCx1x1 arch";
+		w_=1;
+		h_=1;
 		CHECK(boost::filesystem::exists(index_file))<<"Index map does not existed!";
 		std::ifstream infile(index_file.c_str());
 		std::string line;
 		std::string value_str;
-		int w=0,h=0,ch=0,i,j,k;
+		int w=1,h=1,ch=0,i,j,k;
 		while(std::getline(infile,line)){
-			w=0;
+			w=1;
 			std::istringstream ss(line);
+			if(line.empty()){
+							ch++;
+							h=1;
+							continue;
+						}
 			while(std::getline(ss,value_str,',')){
 				w++;
 			}
 			h++;
-			if(line.empty()){
-				ch++;
-				h=0;
-			}
 		}
 		infile.close();
-		h_=h;
-		w_=w;
-		ch_size_=ch;
-		map_.Reshape(num_,ch,h,w);
+		//h+=1;
+		//h+=1;w+=1;ch+=1;
+		char message[255];
+		memset(message,0,255);
+		sprintf(message,"Invalid Dimension of index map!Index Map Dim:%d,%d,%d",ch,h,w);
+		CHECK(w==w_&&h==h_&&ch_size_==ch)<<message;
+		//h_=h;
+		//w_=w;
+		//ch_size_=ch;
+		map_.Reshape(num_,ch_size_,h_,w_);
 		unsigned int* data=map_.mutable_cpu_data();
 		i=0;
 		j=0;
@@ -123,6 +93,11 @@ void MorphLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom, const ve
 		while(std::getline(infile,line)){
 			j=0;
 			std::istringstream ss(line);
+			if(line.empty()){
+				k++;
+				i=0;
+				continue;
+			}
 			while(std::getline(ss,value_str,',')){
 				j++;
 				for(int n=0;n<num_;n++){
@@ -130,13 +105,50 @@ void MorphLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom, const ve
 				}
 			}
 			i++;
-			if(line.empty()){
-				k++;
-				i=0;
-			}
 		}
 		infile.close();
 
+	}else{
+		if(w_>0 && h_>0){
+			printf("Setup for Morph Layer Reshape(%d,%d,%d,%d)\n",num_,ch_size_,w_,h_);
+			map_.Reshape(num_,ch_size_,h_,w_);
+			unsigned int* data=map_.mutable_cpu_data();
+			int scaler=input2_shape[1];
+			size_t index;
+			for(int n=0;n<num_;n++){
+				for(int i=0;i<ch_size_;i++){
+					for(int j=0;j<h_;j++){
+						for(int k=0;k<w_;k++){
+							index=n*ch_size_*h_*w_+i*h_*w_+j*w_+k;
+							newI=(int)floor((float)(i*scaler)/ch_size_);
+							data[index]=n*ch_size2*h_*w_+newI*h_*w_+j*w_+k;
+						}
+					}
+				}
+			}
+		}else{
+			vector<int>new_shape(2);
+			new_shape.push_back(num_);
+			new_shape.push_back(ch_size_);
+			h_=1;
+			w_=1;
+			map_.Reshape(num_,ch_size_,h_,w_);
+			printf("Setup for Morph Layer Reshape(%d,%d,%d,%d)\n",num_,ch_size_,w_,h_);
+			unsigned int* data=map_.mutable_cpu_data();
+			int scaler=input2_shape[1];
+			size_t index;
+			for(int n=0;n<num_;n++){
+				for(int i=0;i<ch_size_;i++){
+					for(int j=0;j<h_;j++){
+						for(int k=0;k<w_;k++){
+							index=n*ch_size_*h_*w_+i*h_*w_+j*w_+k;
+							newI=(int)floor((float)(i*scaler)/ch_size_);
+							data[index]=n*ch_size2*h_*w_+newI*h_*w_+j*w_+k;
+						}
+					}
+				}
+			}
+		}
 	}
 	printf("Setup Finished\n");
 }
