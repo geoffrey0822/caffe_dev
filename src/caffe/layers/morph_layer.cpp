@@ -60,35 +60,47 @@ void MorphLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom, const ve
 		std::ifstream infile(index_file.c_str());
 		std::string line;
 		std::string value_str;
-		int w=1,h=1,ch=0,i,j,k;
+		int w=0,h=0,ch=0,max_w,max_h,i,j,k;
+		bool newline=false;
+		bool firstInit=false;
 		while(std::getline(infile,line)){
-			w=1;
-			std::istringstream ss(line);
 			if(line.empty()){
-							ch++;
-							h=1;
-							continue;
-						}
+				ch++;
+				if(!firstInit){
+					max_w=w;
+					max_h=h;
+					firstInit=true;
+				}
+				h=0;
+				newline=true;
+				continue;
+			}
+			w=0;
+			std::istringstream ss(line);
+			newline=false;
 			while(std::getline(ss,value_str,',')){
 				w++;
 			}
 			h++;
 		}
+		if(!newline)
+			ch++;
 		infile.close();
 		//h+=1;
 		//h+=1;w+=1;ch+=1;
 		char message[255];
 		memset(message,0,255);
-		sprintf(message,"Invalid Dimension of index map!Index Map Dim:%d,%d,%d",ch,h,w);
-		CHECK(w==w_&&h==h_&&ch_size_==ch)<<message;
-		//h_=h;
-		//w_=w;
-		//ch_size_=ch;
+		sprintf(message,"Invalid Dimension of index map!Index Map Dim:<%d,%d,%d> E<%d,%d,%d>",ch,h,w,ch_size_,h_,w_);
+		CHECK(max_w==w_&&max_h==h_&&ch_size_==ch)<<message;
+		h_=max_h;
+		w_=max_w;
+		ch_size_=ch;
 		map_.Reshape(num_,ch_size_,h_,w_);
 		unsigned int* data=map_.mutable_cpu_data();
 		i=0;
 		j=0;
 		k=0;
+		int idx=0;
 		infile.open(index_file.c_str(),std::ifstream::in);
 		while(std::getline(infile,line)){
 			j=0;
@@ -99,10 +111,12 @@ void MorphLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom, const ve
 				continue;
 			}
 			while(std::getline(ss,value_str,',')){
-				j++;
 				for(int n=0;n<num_;n++){
-					data[ch*(w*(n*h+i)+j)+k]=atoi(value_str.c_str());
+					idx=atoi(value_str.c_str());
+					//data[ch_size_*(w_*(n*h_+i)+j)+k]=n*ch_size2*h_*w_+idx*h_*w_+j*w_+k;
+					data[ch_size_*(w_*(n*h_+i)+j)+k]=n*ch_size2*h_*w_+idx*h_*w_+i*w_+j;
 				}
+				j++;
 			}
 			i++;
 		}
