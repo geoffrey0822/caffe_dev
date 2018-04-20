@@ -92,9 +92,9 @@ void MorphLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom, const ve
 		memset(message,0,255);
 		sprintf(message,"Invalid Dimension of index map!Index Map Dim:<%d,%d,%d> E<%d,%d,%d>",ch,h,w,ch_size_,h_,w_);
 		CHECK(max_w==w_&&max_h==h_&&ch_size_==ch)<<message;
-		h_=max_h;
-		w_=max_w;
-		ch_size_=ch;
+		//h_=max_h;
+		//w_=max_w;
+		//ch_size_=ch;
 		map_.Reshape(num_,ch_size_,h_,w_);
 		unsigned int* data=map_.mutable_cpu_data();
 		i=0;
@@ -114,7 +114,7 @@ void MorphLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype> *> &bottom, const ve
 				for(int n=0;n<num_;n++){
 					idx=atoi(value_str.c_str());
 					//data[ch_size_*(w_*(n*h_+i)+j)+k]=n*ch_size2*h_*w_+idx*h_*w_+j*w_+k;
-					data[ch_size_*(w_*(n*h_+i)+j)+k]=n*ch_size2*h_*w_+idx*h_*w_+i*w_+j;
+					data[n*ch_size_*h_*w_+k*h_*w_+i*w_+j]=n*ch_size2*h_*w_+idx*h_*w_+i*w_+j;
 				}
 				j++;
 			}
