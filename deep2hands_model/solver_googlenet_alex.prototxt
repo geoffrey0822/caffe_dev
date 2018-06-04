@@ -1,0 +1,14 @@
+test_iter: 187
+test_interval: 232
+base_lr: 0.001
+max_iter: 6960
+lr_policy: "step"
+gamma: 0.1
+weight_decay: 1e-05
+stepsize: 2297
+snapshot: 2320
+snapshot_prefix: "snapshot_googlenet_alex"
+solver_mode: GPU
+net: "trainval_googlenet_alex.prototxt"
+iter_size: 1
+type: "SGD"

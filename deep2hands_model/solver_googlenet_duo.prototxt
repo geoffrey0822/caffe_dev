@@ -1,0 +1,13 @@
+test_iter: 186
+test_interval: 463
+base_lr: 0.001
+max_iter: 138900
+lr_policy: "step"
+gamma: 0.1
+weight_decay: 1e-05
+stepsize: 45837
+snapshot: 46300
+snapshot_prefix: "snapshot_googlenet_duo"
+solver_mode: GPU
+net: "trainval_googlenet_duo2.prototxt"
+type: "SGD"
