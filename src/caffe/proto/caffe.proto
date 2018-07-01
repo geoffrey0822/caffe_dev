@@ -374,7 +374,7 @@ message LayerParameter {
   // engine parameter for selecting the implementation.
   // The default for the engine is set by the ENGINE switch at compile-time.
   // last ID=149
-  // Custom last_ID=151
+  // Custom last_ID=152
   optional AccuracyParameter accuracy_param = 102;
   optional ArgMaxParameter argmax_param = 103;
   optional BatchNormParameter batch_norm_param = 139;
@@ -425,6 +425,7 @@ message LayerParameter {
   optional ThresholdParameter threshold_param = 128;
   optional TileParameter tile_param = 138;
   optional WindowDataParameter window_data_param = 129;
+  optional YoloV1Parameter yolo_v1_param = 152;
 }
 
 // Message that stores parameters used to apply transformation
@@ -1467,4 +1468,13 @@ message PReLUParameter {
   optional FillerParameter filler = 1;
   // Whether or not slope parameters are shared across channels.
   optional bool channel_shared = 2 [default = false];
+}
+
+message YoloV1Parameter{
+  optional int32 grid_size = 1 [default = 7];
+  optional float gamma_coord = 2 [default = 5];
+  optional float gamma_noobj = 3 [default = 0.5];
+  optional int32 class_num = 4 [default = 2];
+  optional int32 box_num = 5 [default = 2];
+  optional float threshold = 6 [default = 0.2];
 }
