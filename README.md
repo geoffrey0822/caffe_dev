@@ -49,6 +49,7 @@ Please cite Caffe in your publications if it helps your research:
 1. Morph Layer
 2. Correlation Layer
 3. ExpDecayLoss Layer
+4. YOLO V1 Layer
 
 ## Additional License and Citation
 
