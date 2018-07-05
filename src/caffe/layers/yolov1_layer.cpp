@@ -189,11 +189,14 @@ void YoloV1Layer<Dtype>::Reshape(const vector<Blob<Dtype>*>&bottom,
 	int gt_input_size=this->nGrid*this->nGrid*(5*this->nBox+this->nClass);
 	int input_size=bottom[0]->shape()[1];
 	CHECK_EQ(input_size,gt_input_size);
+	vector<int> loss_shape(0);
+	top[0]->Reshape(loss_shape);
 }
 
 template<typename Dtype>
 void YoloV1Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 		const vector<Blob<Dtype>*>& top){
+	//printf("Computing YoLo Loss...\n");
 	const Dtype* x=bottom[0]->cpu_data();
 	const Dtype* gt=bottom[1]->cpu_data();
 	int nBatch=bottom[0]->shape()[0];
@@ -202,6 +205,7 @@ void YoloV1Layer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 
 	caffe_yolo1(nBatch,x,gt,slide,this->nClass,this->nBox,
 			this->scaleXY,this->scaleNoObj,this->threshold,y);
+	//printf("OK...\n");
 }
 
 template<typename Dtype>

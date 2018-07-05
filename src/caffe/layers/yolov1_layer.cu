@@ -20,6 +20,7 @@ __global__ void gpu_yolov1_loss_kernel(const int N,
 	CUDA_KERNEL_LOOP(i,N){
 		if(i==0)
 			Y[0]=0;
+		//printf("GPU 1 Computing YoloLoss\n");
 		Dtype centerLoss,sizeLoss,objLoss,noObjLoss,clsLoss;
 		Dtype tmp_centerLoss,tmp_sizeLoss,tmp_objLoss,tmp_noObjLoss,tmp_clsLoss;
 		Dtype dx,dy,dw,dh,dstatus,dclass;
@@ -82,6 +83,8 @@ __global__ void gpu_dyolov1_loss_kernel(const int N,
 		const float scaleCoord,const float scaleNoObj,
 		const float threshold,Dtype*Y){
 	CUDA_KERNEL_LOOP(i,N){
+
+		//printf("GPU 1 Computing DYoloLoss\n");
 		Dtype dx,dy,dw,dh,dstatus,dclass;
 		Dtype dldx,dldy,dldw,dldh,dldstatus,dldclass;
 		int blobSlide=slide*(5*nBox+nClass);
@@ -126,9 +129,12 @@ void caffe_gpu_yolo1(const int N,const Dtype*X,const Dtype*Gt,
 		const int slide,const int nClass,const int nBox,
 		const float scaleCoord,const float scaleNoObj,
 		const float threshold,Dtype*Y){
+	//printf("Computing...\n");
+
 	gpu_yolov1_loss_kernel<< <CAFFE_GET_BLOCKS(N),CAFFE_CUDA_NUM_THREADS>> >(N,
 			X,Gt,slide,nClass,
 			nBox,scaleCoord,scaleNoObj,threshold,Y);
+
 }
 
 template void caffe_gpu_yolo1<float>(const int N,const float*X,const float*Gt,
@@ -164,13 +170,19 @@ template void caffe_gpu_dyolo1<double>(const int N,const double*X,const double*G
 template<typename Dtype>
 void YoloV1Layer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 		const vector<Blob<Dtype>*>& top){
+
+	//printf("Preparing YoLo Loss[GPU]...\n");
 	const Dtype* x=bottom[0]->gpu_data();
 	const Dtype* gt=bottom[1]->gpu_data();
+	//printf("x and gt are valid\n");
 	int nBatch=bottom[0]->shape()[0];
 	int slide=this->nGrid*this->nGrid;
 	Dtype* y=top[0]->mutable_gpu_data();
-	caffe_yolo1(nBatch,x,gt,slide,this->nClass,this->nBox,
+	//printf("Computing YoLo Loss[GPU]...\n");
+	caffe_gpu_yolo1(nBatch,x,gt,slide,this->nClass,this->nBox,
 				this->scaleXY,this->scaleNoObj,this->threshold,y);
+
+	//printf("OK\n");
 }
 
 template<typename Dtype>
@@ -181,7 +193,7 @@ void YoloV1Layer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 	int nBatch=bottom[0]->shape()[0];
 	int slide=this->nGrid*this->nGrid;
 	Dtype* y=bottom[0]->mutable_gpu_diff();
-	caffe_dyolo1(nBatch,x,gt,slide,this->nClass,this->nBox,
+	caffe_gpu_dyolo1(nBatch,x,gt,slide,this->nClass,this->nBox,
 			this->scaleXY,this->scaleNoObj,this->threshold,y);
 }
 
