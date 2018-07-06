@@ -41,11 +41,11 @@ __global__ void gpu_yolov1_loss_kernel(const int N,
 			tmp_noObjLoss=0;
 			tmp_objLoss=0;
 			for(int k=0;k<nBox;k++){
-				dx=Gt[i*blobSlide+j*boxSlide+5*k]-X[i*blobSlide+j*boxSlide+5*k];
-				dy=Gt[i*blobSlide+j*boxSlide+5*k+1]-X[i*blobSlide+j*boxSlide+5*k+1];
-				dw=Gt[i*blobSlide+j*boxSlide+5*k+2]-X[i*blobSlide+j*boxSlide+5*k+2];
-				dh=Gt[i*blobSlide+j*boxSlide+5*k+3]-X[i*blobSlide+j*boxSlide+5*k+3];
-				dstatus=Gt[i*blobSlide+j*boxSlide+5*k+4]-X[i*blobSlide+j*boxSlide+5*k+4];
+				dx=X[i*blobSlide+j*boxSlide+5*k]-Gt[i*blobSlide+j*boxSlide+5*k];
+				dy=X[i*blobSlide+j*boxSlide+5*k+1]-Gt[i*blobSlide+j*boxSlide+5*k+1];
+				dw=X[i*blobSlide+j*boxSlide+5*k+2]-Gt[i*blobSlide+j*boxSlide+5*k+2];
+				dh=X[i*blobSlide+j*boxSlide+5*k+3]-Gt[i*blobSlide+j*boxSlide+5*k+3];
+				dstatus=X[i*blobSlide+j*boxSlide+5*k+4]-Gt[i*blobSlide+j*boxSlide+5*k+4];
 
 				if(X[i*blobSlide+j*boxSlide+5*k+4]>=largestConf){
 					tmp_centerLoss=(dx*dx)+(dy*dy);
@@ -63,7 +63,7 @@ __global__ void gpu_yolov1_loss_kernel(const int N,
 			}
 			if(hasObj){
 				for(int l=0;l<nClass;l++){
-					dclass=Gt[i*blobSlide+j*boxSlide+5*nBox+l]-X[i*blobSlide+j*boxSlide+5*nBox+l];
+					dclass=X[i*blobSlide+j*boxSlide+5*nBox+l]-Gt[i*blobSlide+j*boxSlide+5*nBox+l];
 					clsLoss+=dclass*dclass;
 				}
 			}
@@ -72,7 +72,10 @@ __global__ void gpu_yolov1_loss_kernel(const int N,
 			noObjLoss+=tmp_noObjLoss;
 			objLoss+=tmp_objLoss;
 		}
-		Y[0]+=(scaleCoord*centerLoss+scaleCoord*sizeLoss+objLoss+scaleNoObj*noObjLoss)/(2*localN)+clsLoss/(2*classN);
+		Y[0]+=(scaleCoord*centerLoss+scaleCoord*sizeLoss+objLoss+scaleNoObj*noObjLoss)+clsLoss;
+
+		//printf("Center Loss:%f, Size Loss:%f, Conf Loss:%f classLoss:%f\n",centerLoss,sizeLoss,objLoss,clsLoss);
+		//Y[0]+=clsLoss;
 	}
 }
 
@@ -92,17 +95,24 @@ __global__ void gpu_dyolov1_loss_kernel(const int N,
 		bool hasObj=false;
 		for(int j=0;j<slide;j++){
 			for(int k=0;k<nBox;k++){
-				dx=Gt[i*blobSlide+j*boxSlide+5*k]-X[i*blobSlide+j*boxSlide+5*k];
-				dy=Gt[i*blobSlide+j*boxSlide+5*k+1]-X[i*blobSlide+j*boxSlide+5*k+1];
-				dw=Gt[i*blobSlide+j*boxSlide+5*k+2]-X[i*blobSlide+j*boxSlide+5*k+2];
-				dh=Gt[i*blobSlide+j*boxSlide+5*k+3]-X[i*blobSlide+j*boxSlide+5*k+3];
-				dstatus=Gt[i*blobSlide+j*boxSlide+5*k+4]-X[i*blobSlide+j*boxSlide+5*k+4];
+				dx=X[i*blobSlide+j*boxSlide+5*k]-Gt[i*blobSlide+j*boxSlide+5*k];
+				dy=X[i*blobSlide+j*boxSlide+5*k+1]-Gt[i*blobSlide+j*boxSlide+5*k+1];
+				dw=X[i*blobSlide+j*boxSlide+5*k+2]-Gt[i*blobSlide+j*boxSlide+5*k+2];
+				dh=X[i*blobSlide+j*boxSlide+5*k+3]-Gt[i*blobSlide+j*boxSlide+5*k+3];
+				dstatus=X[i*blobSlide+j*boxSlide+5*k+4]-Gt[i*blobSlide+j*boxSlide+5*k+4];
 
-				dldx=-dy*scaleCoord;
-				dldy=dx*scaleCoord;
-				dldw=-dh*scaleCoord;
-				dldh=dw*scaleCoord;
-				dldstatus=-(1+scaleNoObj)*dstatus;
+				dldx=2*dx*scaleCoord;
+				dldy=2*dy*scaleCoord;
+				//dldw=(dw/sqrt(X[i*blobSlide+j*boxSlide+5*k+2]))*scaleCoord;
+				//dldh=(dh/sqrt(X[i*blobSlide+j*boxSlide+5*k+3]))*scaleCoord;
+				dldw=2*dw*scaleCoord;
+				dldh=2*dh*scaleCoord;
+				dldstatus=2*dstatus*scaleNoObj;
+				//dldx=-dy*scaleCoord;
+				//dldy=dx*scaleCoord;
+				//dldw=-dh*scaleCoord;
+				//dldh=dw*scaleCoord;
+				//dldstatus=-(1+scaleNoObj)*dstatus;
 				if(X[i*blobSlide+j*boxSlide+5*k+4]>=threshold)
 					hasObj=true;
 
@@ -113,9 +123,11 @@ __global__ void gpu_dyolov1_loss_kernel(const int N,
 				Y[i*blobSlide+j*boxSlide+j*boxSlide+5*k+4]=dldstatus;
 			}
 			for(int l=0;l<nClass;l++){
-				dclass=Gt[i*blobSlide+j*boxSlide+5*nBox+l]-X[i*blobSlide+j*boxSlide+5*nBox+l];
+				//dclass=Gt[i*blobSlide+j*boxSlide+5*nBox+l]-X[i*blobSlide+j*boxSlide+5*nBox+l];
+				dclass=X[i*blobSlide+j*boxSlide+5*nBox+l]-Gt[i*blobSlide+j*boxSlide+5*nBox+l];
 				if(hasObj)
-					dldclass=-X[i*blobSlide+j*boxSlide+5*nBox+l];
+					//dldclass=-X[i*blobSlide+j*boxSlide+5*nBox+l];
+					dldclass=2*dclass;
 				else
 					dldclass=0;
 				Y[i*blobSlide+j*boxSlide+5*nBox+l]=dldclass;

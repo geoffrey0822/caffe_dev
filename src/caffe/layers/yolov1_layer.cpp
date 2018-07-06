@@ -42,11 +42,11 @@ void caffe_yolo1(const int N,const Dtype*X,const Dtype*Gt,
 		largestConf=0;
 		for(int j=0;j<slide;j++){
 			for(int k=0;k<nBox;k++){
-				dx=Gt[i*blobSlide+j*boxSlide+5*k]-X[i*blobSlide+j*boxSlide+5*k];
-				dy=Gt[i*blobSlide+j*boxSlide+5*k+1]-X[i*blobSlide+j*boxSlide+5*k+1];
-				dw=Gt[i*blobSlide+j*boxSlide+5*k+2]-X[i*blobSlide+j*boxSlide+5*k+2];
-				dh=Gt[i*blobSlide+j*boxSlide+5*k+3]-X[i*blobSlide+j*boxSlide+5*k+3];
-				dstatus=Gt[i*blobSlide+j*boxSlide+5*k+4]-X[i*blobSlide+j*boxSlide+5*k+4];
+				dx=X[i*blobSlide+j*boxSlide+5*k]-Gt[i*blobSlide+j*boxSlide+5*k];
+				dy=X[i*blobSlide+j*boxSlide+5*k+1]-Gt[i*blobSlide+j*boxSlide+5*k+1];
+				dw=X[i*blobSlide+j*boxSlide+5*k+2]-Gt[i*blobSlide+j*boxSlide+5*k+2];
+				dh=X[i*blobSlide+j*boxSlide+5*k+3]-Gt[i*blobSlide+j*boxSlide+5*k+3];
+				dstatus=X[i*blobSlide+j*boxSlide+5*k+4]-Gt[i*blobSlide+j*boxSlide+5*k+4];
 
 				if(X[i*blobSlide+j*boxSlide+5*k+4]>=largestConf){
 					largestConf= X[i*blobSlide+j*boxSlide+5*k+4];
@@ -67,7 +67,7 @@ void caffe_yolo1(const int N,const Dtype*X,const Dtype*Gt,
 			}
 			if(hasObj){
 				for(int l=0;l<nClass;l++){
-					dclass=Gt[i*blobSlide+j*boxSlide+5*nBox+l]-X[i*blobSlide+j*boxSlide+5*nBox+l];
+					dclass=X[i*blobSlide+j*boxSlide+5*nBox+l]-Gt[i*blobSlide+j*boxSlide+5*nBox+l];
 					clsLoss+=dclass*dclass;
 				}
 			}
@@ -76,7 +76,7 @@ void caffe_yolo1(const int N,const Dtype*X,const Dtype*Gt,
 			noObjLoss+=tmp_noObjLoss;
 			objLoss=noObjLoss;
 		}
-		Y[0]+=(scaleCoord*centerLoss+scaleCoord*sizeLoss+objLoss+scaleNoObj*noObjLoss)/(2*localN)+clsLoss/(2*classN);
+		Y[0]+=(scaleCoord*centerLoss+scaleCoord*sizeLoss+objLoss+scaleNoObj*noObjLoss)+clsLoss;
 	}
 }
 
@@ -106,11 +106,11 @@ void caffe_dyolo1(const int N,const Dtype*X,const Dtype*Gt,
 		for(int j=0;j<slide;j++){
 			hasObj=false;
 			for(int k=0;k<nBox;k++){
-				dx=Gt[i*blobSlide+j*boxSlide+5*k]-X[i*blobSlide+j*boxSlide+5*k];
-				dy=Gt[i*blobSlide+j*boxSlide+5*k+1]-X[i*blobSlide+j*boxSlide+5*k+1];
-				dw=Gt[i*blobSlide+j*boxSlide+5*k+2]-X[i*blobSlide+j*boxSlide+5*k+2];
-				dh=Gt[i*blobSlide+j*boxSlide+5*k+3]-X[i*blobSlide+j*boxSlide+5*k+3];
-				dstatus=Gt[i*blobSlide+j*boxSlide+5*k+4]-X[i*blobSlide+j*boxSlide+5*k+4];
+				dx=X[i*blobSlide+j*boxSlide+5*k]-Gt[i*blobSlide+j*boxSlide+5*k];
+				dy=X[i*blobSlide+j*boxSlide+5*k+1]-Gt[i*blobSlide+j*boxSlide+5*k+1];
+				dw=X[i*blobSlide+j*boxSlide+5*k+2]-Gt[i*blobSlide+j*boxSlide+5*k+2];
+				dh=X[i*blobSlide+j*boxSlide+5*k+3]-Gt[i*blobSlide+j*boxSlide+5*k+3];
+				dstatus=X[i*blobSlide+j*boxSlide+5*k+4]-Gt[i*blobSlide+j*boxSlide+5*k+4];
 
 				dldx=0;
 				dldy=0;
@@ -120,11 +120,18 @@ void caffe_dyolo1(const int N,const Dtype*X,const Dtype*Gt,
 
 				if(X[i*blobSlide+j*boxSlide+5*k+4]>=largestConf){
 					largestConf=X[i*blobSlide+j*boxSlide+5*k+4];
-					dldx=-dy*scaleCoord;
-					dldy=dx*scaleCoord;
-					dldw=-dh*scaleCoord;
-					dldh=dw*scaleCoord;
-					dldstatus=-(1+scaleNoObj)*dstatus;
+					dldx=2*dx*scaleCoord;
+					dldy=2*dy*scaleCoord;
+					//dldw=(dw/sqrt(X[i*blobSlide+j*boxSlide+5*k+2]))*scaleCoord;
+					//dldh=(dh/sqrt(X[i*blobSlide+j*boxSlide+5*k+3]))*scaleCoord;
+					dldw=2*dw*scaleCoord;
+					dldh=2*dh*scaleCoord;
+					dldstatus=2*dstatus*scaleNoObj;
+					//dldx=-dy*scaleCoord;
+					//dldy=dx*scaleCoord;
+					//dldw=-(dh/2*sqrt(X[i*blobSlide+j*boxSlide+5*k+2]))*scaleCoord;
+					//dldh=-(dw*scaleCoord;
+					//dldstatus=-(1+scaleNoObj)*dstatus;
 
 				}
 
@@ -139,9 +146,11 @@ void caffe_dyolo1(const int N,const Dtype*X,const Dtype*Gt,
 
 			}
 			for(int l=0;l<nClass;l++){
-				dclass=Gt[i*blobSlide+j*boxSlide+5*nBox+l]-X[i*blobSlide+j*boxSlide+5*nBox+l];
+				//dclass=Gt[i*blobSlide+j*boxSlide+5*nBox+l]-X[i*blobSlide+j*boxSlide+5*nBox+l];
+				dclass=X[i*blobSlide+j*boxSlide+5*nBox+l]-Gt[i*blobSlide+j*boxSlide+5*nBox+l];
 				if(hasObj)
-					dldclass=-X[i*blobSlide+j*boxSlide+5*nBox+l];
+					//dldclass=-X[i*blobSlide+j*boxSlide+5*nBox+l];
+					dldclass=2*dclass;
 				else
 					dldclass=0;
 				Y[i*blobSlide+j*boxSlide+5*nBox+l]=dldclass;
