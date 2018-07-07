@@ -43,8 +43,8 @@ __global__ void gpu_yolov1_loss_kernel(const int N,
 			for(int k=0;k<nBox;k++){
 				dx=X[i*blobSlide+j*boxSlide+5*k]-Gt[i*blobSlide+j*boxSlide+5*k];
 				dy=X[i*blobSlide+j*boxSlide+5*k+1]-Gt[i*blobSlide+j*boxSlide+5*k+1];
-				dw=X[i*blobSlide+j*boxSlide+5*k+2]-Gt[i*blobSlide+j*boxSlide+5*k+2];
-				dh=X[i*blobSlide+j*boxSlide+5*k+3]-Gt[i*blobSlide+j*boxSlide+5*k+3];
+				dw=sqrt(X[i*blobSlide+j*boxSlide+5*k+2])-sqrt(Gt[i*blobSlide+j*boxSlide+5*k+2]);
+				dh=sqrt(X[i*blobSlide+j*boxSlide+5*k+3])-sqrt(Gt[i*blobSlide+j*boxSlide+5*k+3]);
 				dstatus=X[i*blobSlide+j*boxSlide+5*k+4]-Gt[i*blobSlide+j*boxSlide+5*k+4];
 
 				if(X[i*blobSlide+j*boxSlide+5*k+4]>=largestConf){
@@ -103,10 +103,10 @@ __global__ void gpu_dyolov1_loss_kernel(const int N,
 
 				dldx=2*dx*scaleCoord;
 				dldy=2*dy*scaleCoord;
-				//dldw=(dw/sqrt(X[i*blobSlide+j*boxSlide+5*k+2]))*scaleCoord;
-				//dldh=(dh/sqrt(X[i*blobSlide+j*boxSlide+5*k+3]))*scaleCoord;
-				dldw=2*dw*scaleCoord;
-				dldh=2*dh*scaleCoord;
+				dldw=(dw/sqrt(X[i*blobSlide+j*boxSlide+5*k+2]))*scaleCoord;
+				dldh=(dh/sqrt(X[i*blobSlide+j*boxSlide+5*k+3]))*scaleCoord;
+				//dldw=2*dw*scaleCoord;
+				//dldh=2*dh*scaleCoord;
 				dldstatus=2*dstatus*scaleNoObj;
 				//dldx=-dy*scaleCoord;
 				//dldy=dx*scaleCoord;

@@ -44,8 +44,8 @@ void caffe_yolo1(const int N,const Dtype*X,const Dtype*Gt,
 			for(int k=0;k<nBox;k++){
 				dx=X[i*blobSlide+j*boxSlide+5*k]-Gt[i*blobSlide+j*boxSlide+5*k];
 				dy=X[i*blobSlide+j*boxSlide+5*k+1]-Gt[i*blobSlide+j*boxSlide+5*k+1];
-				dw=X[i*blobSlide+j*boxSlide+5*k+2]-Gt[i*blobSlide+j*boxSlide+5*k+2];
-				dh=X[i*blobSlide+j*boxSlide+5*k+3]-Gt[i*blobSlide+j*boxSlide+5*k+3];
+				dw=sqrt(X[i*blobSlide+j*boxSlide+5*k+2])-sqrt(Gt[i*blobSlide+j*boxSlide+5*k+2]);
+				dh=sqrt(X[i*blobSlide+j*boxSlide+5*k+3])-sqrt(Gt[i*blobSlide+j*boxSlide+5*k+3]);
 				dstatus=X[i*blobSlide+j*boxSlide+5*k+4]-Gt[i*blobSlide+j*boxSlide+5*k+4];
 
 				if(X[i*blobSlide+j*boxSlide+5*k+4]>=largestConf){
@@ -108,8 +108,8 @@ void caffe_dyolo1(const int N,const Dtype*X,const Dtype*Gt,
 			for(int k=0;k<nBox;k++){
 				dx=X[i*blobSlide+j*boxSlide+5*k]-Gt[i*blobSlide+j*boxSlide+5*k];
 				dy=X[i*blobSlide+j*boxSlide+5*k+1]-Gt[i*blobSlide+j*boxSlide+5*k+1];
-				dw=X[i*blobSlide+j*boxSlide+5*k+2]-Gt[i*blobSlide+j*boxSlide+5*k+2];
-				dh=X[i*blobSlide+j*boxSlide+5*k+3]-Gt[i*blobSlide+j*boxSlide+5*k+3];
+				dw=sqrt(X[i*blobSlide+j*boxSlide+5*k+2])-sqrt(Gt[i*blobSlide+j*boxSlide+5*k+2]);
+				dh=sqrt(X[i*blobSlide+j*boxSlide+5*k+3])-sqrt(Gt[i*blobSlide+j*boxSlide+5*k+3]);
 				dstatus=X[i*blobSlide+j*boxSlide+5*k+4]-Gt[i*blobSlide+j*boxSlide+5*k+4];
 
 				dldx=0;
