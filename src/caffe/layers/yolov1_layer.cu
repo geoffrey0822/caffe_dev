@@ -72,7 +72,7 @@ __global__ void gpu_yolov1_loss_kernel(const int N,
 			noObjLoss+=tmp_noObjLoss;
 			objLoss+=tmp_objLoss;
 		}
-		Y[0]+=(scaleCoord*centerLoss+scaleCoord*sizeLoss+objLoss+scaleNoObj*noObjLoss)+clsLoss;
+		Y[0]+=((scaleCoord*centerLoss+scaleCoord*sizeLoss+objLoss+scaleNoObj*noObjLoss)+clsLoss)/N;
 
 		//printf("Center Loss:%f, Size Loss:%f, Conf Loss:%f classLoss:%f\n",centerLoss,sizeLoss,objLoss,clsLoss);
 		//Y[0]+=clsLoss;

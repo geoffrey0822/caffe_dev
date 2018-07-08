@@ -76,7 +76,7 @@ void caffe_yolo1(const int N,const Dtype*X,const Dtype*Gt,
 			noObjLoss+=tmp_noObjLoss;
 			objLoss=noObjLoss;
 		}
-		Y[0]+=(scaleCoord*centerLoss+scaleCoord*sizeLoss+objLoss+scaleNoObj*noObjLoss)+clsLoss;
+		Y[0]+=((scaleCoord*centerLoss+scaleCoord*sizeLoss+objLoss+scaleNoObj*noObjLoss)+clsLoss)/N;
 	}
 }
 
