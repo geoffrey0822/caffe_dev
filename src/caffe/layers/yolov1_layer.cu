@@ -52,6 +52,13 @@ __global__ void gpu_yolov1_loss_kernel(const int N,
 					tmp_sizeLoss=(dw*dw)+(dh*dh);
 					tmp_noObjLoss=(dstatus*dstatus);
 					tmp_objLoss=noObjLoss;
+					if(Gt[i*blobSlide+j*boxSlide+5*k+4]>0)
+						tmp_noObjLoss=0;
+					else{
+						tmp_objLoss=0;
+						tmp_centerLoss=0;
+						tmp_sizeLoss=0;
+					}
 				}
 
 				//centerLoss+=(dx*dx)+(dy*dy);
@@ -107,7 +114,15 @@ __global__ void gpu_dyolov1_loss_kernel(const int N,
 				dldh=(dh/sqrt(X[i*blobSlide+j*boxSlide+5*k+3]))*scaleCoord;
 				//dldw=2*dw*scaleCoord;
 				//dldh=2*dh*scaleCoord;
-				dldstatus=2*dstatus*scaleNoObj;
+				if(Gt[i*blobSlide+j*boxSlide+5*k+4]>0)
+					dldstatus=2*dstatus;
+				else{
+					dldstatus=2*dstatus*scaleNoObj;
+					dldx=0;
+					dldy=0;
+					dldw=0;
+					dldh=0;
+				}
 				//dldx=-dy*scaleCoord;
 				//dldy=dx*scaleCoord;
 				//dldw=-dh*scaleCoord;

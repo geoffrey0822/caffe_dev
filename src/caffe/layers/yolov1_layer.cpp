@@ -54,6 +54,14 @@ void caffe_yolo1(const int N,const Dtype*X,const Dtype*Gt,
 					tmp_sizeLoss=(dw*dw)+(dh*dh);
 					tmp_noObjLoss=(dstatus*dstatus);
 					tmp_objLoss=tmp_noObjLoss;
+					if(Gt[i*blobSlide+j*boxSlide+5*k+4]>=threshold)
+						tmp_noObjLoss=0;
+					else{
+						tmp_objLoss=0;
+						tmp_centerLoss=0;
+						tmp_sizeLoss=0;
+
+					}
 				}
 
 				//centerLoss+=(dx*dx)+(dy*dy);
@@ -122,11 +130,19 @@ void caffe_dyolo1(const int N,const Dtype*X,const Dtype*Gt,
 					largestConf=X[i*blobSlide+j*boxSlide+5*k+4];
 					dldx=2*dx*scaleCoord;
 					dldy=2*dy*scaleCoord;
-					//dldw=(dw/sqrt(X[i*blobSlide+j*boxSlide+5*k+2]))*scaleCoord;
-					//dldh=(dh/sqrt(X[i*blobSlide+j*boxSlide+5*k+3]))*scaleCoord;
-					dldw=2*dw*scaleCoord;
-					dldh=2*dh*scaleCoord;
-					dldstatus=2*dstatus*scaleNoObj;
+					dldw=(dw/sqrt(X[i*blobSlide+j*boxSlide+5*k+2]))*scaleCoord;
+					dldh=(dh/sqrt(X[i*blobSlide+j*boxSlide+5*k+3]))*scaleCoord;
+					//dldw=2*dw*scaleCoord;
+					//dldh=2*dh*scaleCoord;
+					if(Gt[i*blobSlide+j*boxSlide+5*k+4]>=threshold)
+						dldstatus=2*dstatus;
+					else{
+						dldstatus=2*dstatus*scaleNoObj;
+						dldx=0;
+						dldy=0;
+						dldh=0;
+						dldw=0;
+					}
 					//dldx=-dy*scaleCoord;
 					//dldy=dx*scaleCoord;
 					//dldw=-(dh/2*sqrt(X[i*blobSlide+j*boxSlide+5*k+2]))*scaleCoord;
