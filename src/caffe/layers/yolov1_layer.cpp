@@ -200,7 +200,17 @@ void YoloV1Layer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>&bottom,
 	vector<int> in_shape=bottom[0]->shape();
 	vector<int> inGT_shape=bottom[1]->shape();
 
-	CHECK_EQ(in_shape[1],inGT_shape[1]);
+	int totalA=1,totalB=1;
+	for(int i=1;i<in_shape.size();i++){
+		totalA*=in_shape[i];
+		printf("%d ",in_shape[i]);
+	}
+	printf("=%d\n",totalA);
+	for(int i=1;i<inGT_shape.size();i++){
+		totalB*=inGT_shape[i];
+	}
+
+	CHECK_EQ(totalA,totalB);
 
 	CHECK_GE(this->nClass,2);
 	CHECK_GE(this->nBox,1);
@@ -213,7 +223,22 @@ void YoloV1Layer<Dtype>::Reshape(const vector<Blob<Dtype>*>&bottom,
 		const vector<Blob<Dtype>*>& top){
 	int gt_input_size=this->nGrid*this->nGrid*(5*this->nBox+this->nClass);
 	int input_size=bottom[0]->shape()[1];
-	CHECK_EQ(input_size,gt_input_size);
+
+	vector<int> in_shape=bottom[0]->shape();
+	vector<int> inGT_shape=bottom[1]->shape();
+
+	int totalA=1,totalB=1;
+	for(int i=1;i<in_shape.size();i++){
+		totalA*=in_shape[i];
+		//printf("%d ",in_shape[i]);
+	}
+	//printf("=%d\n",totalA);
+	for(int i=1;i<inGT_shape.size();i++){
+		totalB*=inGT_shape[i];
+	}
+
+	CHECK_EQ(totalA,totalB);
+
 	vector<int> loss_shape(0);
 	top[0]->Reshape(loss_shape);
 }
